@@ -1,0 +1,46 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/mounika/CPP/sem/libigl/external/glad/include/KHR/khrplatform.h
+stdint.h
+-
+inttypes.h
+-
+stdint.h
+-
+
+/home/mounika/CPP/sem/libigl/external/glad/include/glad/glad.h
+windows.h
+-
+stddef.h
+-
+KHR/khrplatform.h
+-
+inttypes.h
+-
+inttypes.h
+-
+inttypes.h
+-
+stdint.h
+-
+stdint.h
+-
+inttypes.h
+-
+
+/home/mounika/CPP/sem/libigl/external/glad/src/glad.c
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+glad/glad.h
+-
+

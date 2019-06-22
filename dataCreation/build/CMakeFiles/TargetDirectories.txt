@@ -1,0 +1,11 @@
+/home/mounika/MTP/sem/build/CMakeFiles/rebuild_cache.dir
+/home/mounika/MTP/sem/build/CMakeFiles/example_bin.dir
+/home/mounika/MTP/sem/build/CMakeFiles/edit_cache.dir
+/home/mounika/MTP/sem/build/glad/CMakeFiles/rebuild_cache.dir
+/home/mounika/MTP/sem/build/glad/CMakeFiles/glad.dir
+/home/mounika/MTP/sem/build/glad/CMakeFiles/edit_cache.dir
+/home/mounika/MTP/sem/build/glfw/CMakeFiles/rebuild_cache.dir
+/home/mounika/MTP/sem/build/glfw/CMakeFiles/edit_cache.dir
+/home/mounika/MTP/sem/build/glfw/src/CMakeFiles/rebuild_cache.dir
+/home/mounika/MTP/sem/build/glfw/src/CMakeFiles/glfw.dir
+/home/mounika/MTP/sem/build/glfw/src/CMakeFiles/edit_cache.dir

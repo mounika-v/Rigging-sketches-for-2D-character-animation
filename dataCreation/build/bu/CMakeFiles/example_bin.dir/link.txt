@@ -1,0 +1,1 @@
+/usr/bin/c++    -rdynamic CMakeFiles/example_bin.dir/main.cpp.o  -o example_bin -lGL glad/libglad.a glfw/src/libglfw3.a -lrt -lm -ldl -lX11 -lpthread 
