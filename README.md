@@ -1,6 +1,12 @@
 # Parsing-sketches-for-2D-character-animation
 Rigging is a crucial step in skeletal animation.  However, the current method doesn’tgive the ease of doing it automatically. It involves manual effort to perform rigging andskinning. We present a method to perform auto-rigging for 2D animation by parsing the2D model sketches of a character. The method we are suggesting will take an image ofthe character’s model sketch in T-pose as input and generates a skeleton and skinninginformation of the character for the animator to take it further. We adopted a 3D meshcontraction method for 2D mesh to achieve this goal. Using this data we trained an available pose estimation model to work for sketches as well. We are able to give a decent initialization which can be edited further.
 
+Input:
+![input](https://www.cse.iitb.ac.in/~mounika/finalmtp/ip/demo5.png) 
+
+Output:
+![output](https://www.cse.iitb.ac.in/~mounika/finalmtp/op/demo5.png)
+
 ### Steps to run mesh contraction method:
 1. Download [libigl](https://github.com/libigl/libigl) and [triangle ](https://www.cs.cmu.edu/~quake/triangle.html)
 
