@@ -6,39 +6,39 @@ Download libigl and triangle
 
 Extract them in the parent folder and install them as instructed in their respective homepages
 
+```bash
 g++ -o trace2 cimgdemo.cpp -lX11 -lpthread 
-
 ./trace2
-
 cd triangle
-
 triangle -p contour
-
 triangle -rpa100 contour.1
-
 showme contour.2.ele &
-
 cd ..
-
 g++ -o makeoff makeoff.cpp
-
 ./makeoff
-
 sem/build ./example_bin
-
 sem/1d ./draft1
-
 sem/2d ./draft1
-
+```
+To generate the json file for training:
+```bash
+python3 getcontours.py
+python3 genannotations.py
+```
 # Instructions for model.
 go to model directory
 
 Install all the requirements
-
+```bash
 pip -r requirements.txt
-
+```
 For training the model follow the instructions from here
 
-For running the demo for individual image ./rundemo.sh <path to image>
-
-For running the GUI tool, python3 rigit.py
+For running the demo for individual image:
+```bash
+./rundemo.sh <path to image>
+```
+For running on the GUI tool:
+```bash
+python3 rigit.py
+```
