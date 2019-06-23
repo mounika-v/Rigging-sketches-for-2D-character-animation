@@ -38,6 +38,9 @@ class MainWindow():
         # self.textspace = Text(self.frame)
         self.edges=[]
         self.keypoints=[]
+        self.donelist = []
+        self.pstack = []
+        self.children = []
         self.color = [255,0 , 0]
         self.colorcircle = [0, 0, 255]
         self.mode = ""
@@ -77,6 +80,13 @@ class MainWindow():
             writefile.write(str(kpt[0])+","+str(kpt[1])+",0.0\n")
         for edge in self.edges:
             writefile.write(str(edge[0])+","+str(edge[1])+"\n")
+        for point in self.donelist:
+            writefile.write(str(point)+",")
+        writefile.write("\n")
+        for childs in self.children:
+            for child in childs:
+                writefile.write(str(child)+",")
+            writefile.write("\n")
         writefile.close()
         print("File saved as ",self.outputfile)
         self.tkinter_display('File saved as '+self.outputfile)
@@ -84,15 +94,31 @@ class MainWindow():
     def loadSaved(self):
         filename = self.outputfile
         opfile = open(filename)
+        hierflag=False
         for aline in opfile:
+            aline = aline.split('\n')[0]
             args = aline.split(',')
-            if(len(args) == 1):
+            if(len(args) == 1 and hierflag ==False):
                 self.inputfile = args[0]
-            elif(len(args)==2):
+            elif(len(args)==2 and hierflag ==False):
                 self.edges.append((int(float(args[0])),int(float(args[1].split('/')[0]))))
-            elif(len(args)==3):
+            elif(len(args)==3 and hierflag ==False):
                 self.keypoints.append((int(float(args[0])),int(float(args[1]))))
+            elif(len(args)>3 and hierflag ==False):
+                args.remove('')
+                for iter in args:
+                    self.donelist.append(int(iter))
+                hierflag = True
+            elif hierflag:
+                child = []
+                args.remove('')
+                if len(args) > 0:
+                    for iter in args:
+                        child.append(int(iter))
+                self.children.append(child)
         opfile.close()
+        print(self.donelist)
+        print(self.children)
         self.inputfile = self.inputfile.split('\n')[0]
         self.source = relpath(self.inputfile,os.getcwd())
         self.loadSkeleton()
@@ -102,6 +128,10 @@ class MainWindow():
         if filename != "" and filename.split('.')[-1] == "skl":
             self.tkinter_display("Openinng file "+filename)
             self.outputfile = filename
+            self.keypoints.clear()
+            self.edges.clear()
+            self.children.clear()
+            self.donelist.clear()
             self.loadSaved()
         else:
             self.tkinter_display("Please select a .skl file")
@@ -125,6 +155,26 @@ class MainWindow():
         self.mode = "delete"
         self.tkinter_display("Select a node to delete it")
         self.resetflags()
+
+    def onHierarchy(self):
+        self.mode = "hier"
+        self.tkinter_display("Select the root point")
+        self.resetflags()
+
+    def bfs(self):
+        target = self.pstack.pop(0)
+        child = []
+        for edge in self.edges:
+            if edge[0]==target and (len(self.donelist) == 0 or (edge[1] not in self.donelist and edge[1] not in child)):
+                child.append(edge[1])
+                self.pstack.append(edge[1])
+            elif edge[1]==target and (len(self.donelist) == 0 or (edge[0] not in self.donelist and edge[0] not in child)):
+                child.append(edge[0])
+                self.pstack.append(edge[0])
+        self.donelist.append(target)
+        self.children.append(child)
+        for k in child:
+            self.bfs()
 
     def printcoords(self,event):
         if(event.x >= 0 and event.x <= self.srcwidth and event.y >= 0 and event.y <= self.srcheight):
@@ -179,8 +229,10 @@ class MainWindow():
                         dist = sqrt(pow((kpx-event.x),2)+pow((kpy-event.y),2))
                         if(dist<=8):
                             break;
-                    self.pivot1 = i
-                    self.flag = 1
+                    if i < len(self.keypoints):
+                        self.pivot1 = i
+                        self.flag = 1
+                if self.flag == 1:
                     neighbors = []
                     for i in range(len(self.edges)):
                         if self.edges[i][0] == self.pivot1:
@@ -208,7 +260,23 @@ class MainWindow():
                         kk+=1
                     self.loadSkeleton()
                     self.resetflags()
-
+            elif self.mode == "hier":
+                if self.flag == 0:
+                    for i in range(len(self.keypoints)):
+                        kpx = int(self.keypoints[i][0])
+                        kpy = int(self.keypoints[i][1])
+                        dist = sqrt(pow((kpx-event.x),2)+pow((kpy-event.y),2))
+                        if(dist<=8):
+                            break;
+                    if i < len(self.keypoints):
+                        self.pivot1=i
+                        self.flag = 1
+                    else:
+                        self.tkinter_display("Please select from displayed points")
+                if self.flag == 1:
+                    self.pstack.append(self.pivot1)
+                    self.bfs()
+                    self.tkinter_display("Hierarchy generated")
 
     def onEdit(self):
         self.addbutton = Button(self.frame2, text="Add point", command=self.addmode)
@@ -219,6 +287,8 @@ class MainWindow():
         self.deletebutton.grid(row=1,column=3)
         self.resetbutton = Button(self.frame2, text="Reset prediction",command=self.onPredict)
         self.resetbutton.grid(row=1,column=4)
+        self.hierarchy = Button(self.frame2, text="Hierarchy",command=self.onHierarchy)
+        self.hierarchy.grid(row=1,column=5)
         self.canvas.bind("<Button 1>",self.printcoords)
 
     def openImage(self):
@@ -227,6 +297,7 @@ class MainWindow():
             self.movebutton.grid_remove()
             self.deletebutton.grid_remove()
             self.resetbutton.grid_remove()
+            self.hierarchy.grid_remove()
         except(NameError, AttributeError):
             pass
         filename = askopenfilename(title="Select an image")
@@ -250,6 +321,10 @@ class MainWindow():
         os.system(mycmd)
         filename = filename.split('/')[-1]
         self.outputfile = "output/"+(filename.split('.')[0])+".skl"
+        self.edges.clear()
+        self.children.clear()
+        self.donelist.clear()
+        self.keypoints.clear()
         self.loadSaved()
 
 #----------------------------------------------------------------------

@@ -109,6 +109,7 @@ def run_demo(net, image_provider, height_size, cpu):
             outputname = "output/"+(outputname.split('.')[0])+".skl"
         skeletonfile = open(outputname,"w")
         skeletonfile.write(imagepath[0]+"\n")
+        # Write all the keypoints to output
         for kpt in all_keypoints:
             skeletonfile.write(str(kpt[0])+","+str(kpt[1])+",0.0\n")
 
@@ -124,10 +125,12 @@ def run_demo(net, image_provider, height_size, cpu):
             rightx,righty = all_keypoints[int(pose_entries[n][8]), 0:2]#right leg vertex
             rootx = bneck*neckx + bleft*leftx + bright*rightx
             rooty = bneck*necky + bleft*lefty + bright*righty
+            # Add root point to keypoints
             skeletonfile.write(str(rootx)+","+str(rooty)+",0.0\n")
             ########### Plot root point
             cv2.circle(img,(int(rootx),int(rooty)),8,colorcircle,-1)
             ############ Draw lines
+            writeedges = []
             for part_id in range(len(BODY_PARTS_PAF_IDS) - 2):
                 kpt_a_id = BODY_PARTS_KPT_IDS[part_id][0]
                 global_kpt_a_id = pose_entries[n][kpt_a_id]
@@ -141,31 +144,26 @@ def run_demo(net, image_provider, height_size, cpu):
                     cv2.circle(img, (int(x_b), int(y_b)), 8, colorcircle, -1)
                 keypointsize = len(all_keypoints)
                 if global_kpt_a_id != -1 and global_kpt_b_id != -1:
-                    # skeletonfile.write(str(global_kpt_a_id)+","+str(global_kpt_b_id)+"\n")
-                    # cv2.line(img, (int(x_a), int(y_a)), (int(x_b), int(y_b)), color, 3)
                     if kpt_a_id == 1 and (kpt_b_id == 8 or kpt_b_id == 11):
-                        skeletonfile.write(str(global_kpt_a_id)+","+str(keypointsize)+"\n")
-                        skeletonfile.write(str(keypointsize)+","+str(global_kpt_b_id)+"\n")
+                        if (global_kpt_a_id,keypointsize) not in writeedges:
+                            writeedges.append((global_kpt_a_id,keypointsize))
+                        if (keypointsize,global_kpt_b_id) not in writeedges:
+                            writeedges.append((keypointsize,global_kpt_b_id))
+                        # skeletonfile.write(str(global_kpt_a_id)+","+str(keypointsize)+"\n")
+                        # skeletonfile.write(str(keypointsize)+","+str(global_kpt_b_id)+"\n")
                         cv2.line(img,(int(x_a), int(y_a)),(int(rootx),int(rooty)),color,3)
                         cv2.line(img,(int(rootx),int(rooty)),(int(x_b), int(y_b)),color,3)
                     else:
-                        skeletonfile.write(str(global_kpt_a_id)+","+str(global_kpt_b_id)+"\n")
+                        if (global_kpt_a_id,global_kpt_b_id) not in writeedges:
+                            writeedges.append((global_kpt_a_id,global_kpt_b_id))
+                        # skeletonfile.write(str(global_kpt_a_id)+","+str(global_kpt_b_id)+"\n")
                         cv2.line(img, (int(x_a), int(y_a)), (int(x_b), int(y_b)), color, 3)
 
-        skeletonfile.close()
-        # p1x,p1y = all_keypoints[1, 0:2]
-        # p2x,p2y = all_keypoints[2, 0:2]
-        # p5x,p5y = all_keypoints[5, 0:2]
-        # # print(p1x," == ",(p2x+p5x)/2)
-        # slope = (p5y-p2y)/(p5x-p2x)
-        # they = (slope * (p1x-p2x)) + p2y
-        # they1 = (slope * ((p2x+p5x)/2 - p2x))+p2y
-        # print(they,"  +++  ",they1," ===  ",p1y)
-        #
-        # rb,lb,nb
-        # rx = rb*
+            # Writing the edges to file
+            for eachi in writeedges:
+                skeletonfile.write(str(eachi[0])+","+str(eachi[1])+"\n")
 
-        #img = cv2.addWeighted(orig_img, 0.6, img, 0.4, 0)
+        skeletonfile.close()
 
         if imagename != "":
             imagename = (imagename[0].split('/')[-1])
@@ -175,12 +173,6 @@ def run_demo(net, image_provider, height_size, cpu):
         else:
             imagename = "output/tempop.png"
         cv2.imwrite(imagename,img)
-        # cv2.imwrite("output/temp.png",img)
-        # cv2.imshow('Lightweight Human Pose Estimation Python Demo', img)
-        # key = cv2.waitKey(500000)
-        # if key == 27:  # esc
-        #     return
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
