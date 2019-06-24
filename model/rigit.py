@@ -98,6 +98,8 @@ class MainWindow():
         for aline in opfile:
             aline = aline.split('\n')[0]
             args = aline.split(',')
+            if '' in args:
+                args.remove('')
             if(len(args) == 1 and hierflag ==False):
                 self.inputfile = args[0]
             elif(len(args)==2 and hierflag ==False):
@@ -105,13 +107,11 @@ class MainWindow():
             elif(len(args)==3 and hierflag ==False):
                 self.keypoints.append((int(float(args[0])),int(float(args[1]))))
             elif(len(args)>3 and hierflag ==False):
-                args.remove('')
                 for iter in args:
                     self.donelist.append(int(iter))
                 hierflag = True
             elif hierflag:
                 child = []
-                args.remove('')
                 if len(args) > 0:
                     for iter in args:
                         child.append(int(iter))
