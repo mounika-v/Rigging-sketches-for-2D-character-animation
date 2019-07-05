@@ -12,21 +12,26 @@ void turn(int &dir, int &curri, int &currj, char turnto);
 void fillneighbor(int dir,int &initi, int &initj, vector<int> &ni, vector<int> &nj);
 void finddirection(int idiff,int jdiff,int &dir);
 
+/*Implementing moores neighbourhood algorithm to extract the contour of the sketch*/
 int main()
 {
+	/*To be implemented: To take any sketch as an input from arguments.
+	The current implementation takes a sketch "sketch.png" always. so, before running this,
+	rename the sketch to sketch.png"*/
 	CImg<unsigned char> isrc("sketch.png");//,512,512,1,3);
 
+	/* dir variable determines the direction of parsing after detecting a valid contour pixel */
 	int done,dir;
+	/*Contouri and contourj are the x,y coordinates of the contour*/
 	vector <int> contouri,contourj;
 
 	int width = isrc.width();
 	int height = isrc.height();
+
 	int bc = 0,c,r;
 	bool breakflag = false;
 
-	cout << width << "x" << height << endl;
-	cout << isrc.depth() << " , " << isrc.spectrum()<<endl;
-
+	/* To resize the image for creating training data with images of constant size */
 	CImg<unsigned char> src = isrc.get_resize(512,512,1,3);
 	width = src.width();
 	height = src.height();
@@ -34,14 +39,15 @@ int main()
 	cout << width << "x" << height << endl;
 	cout << src.depth() << " , " << src.spectrum()<<endl;
 
-
+	/*Change it to a grey scale image*/
 	src.channel(0);
+	/*Detech the first valid pixel on the imagge scanning from bottom left*/
 	for (r = height-1 ; r>=0 ; r--)
 	{
 		for (c = 0; c < width; c++)
 		{
-			// cout<<r<<"  "<<c<<"   "<<(int)src(c,r,0,0)<<endl;
 			if((int)src(c,r,0,0) < 175 )//&& (int)src(c,r,0,1) == 0 && (int)src(c,r,0,2) == 0)
+			/*If the pixel value is less than 175 we consider it a valid pixel*/
 			{
 				breakflag = true;break;
 			}
@@ -49,17 +55,13 @@ int main()
 		if(breakflag)
 			break;
 	}
-	cout<<c<<" "<<r<<endl;
-	// cout<<"black pixel count: "<<bc<<endl;
 
 	/*---------------------------------- moores contour --------------------------------*/
 	dir=2;
-	done = 2;
+	done = 2; /*Iteration counter for the no. of times the contour is parsed to make sure it is not stuck in a neighbourhood of single pixel */
 	int initi=r,initj=c;
 	vector<int> ni,nj;
 	int idiff, jdiff,currc,currr;
-
-	// done = 0;
 
 	while(done>0)
 	{
@@ -75,25 +77,29 @@ int main()
 		for(iiter = ni.begin(),jiter = nj.begin(); iiter != ni.end() ; iiter++,jiter++) //iterate through neighbourhood points
 		{
 			//cout<<*iiter<<" "<<*jiter<<endl;
-			currc = *jiter; currr = *iiter;
+			currc = *jiter; currr = *iiter; //Current column and row
+			// done = 0;
+
 			if((int)src(currc,currr,0,0) < 250) // && (int)src(currc,currr,0,1) == 0 && (int)src(currc,currr,0,2) == 0)
+			//Any pixel that has grey value <250 because contours have very light areas.
 			{
-				// cout<<"  -- met a black pixel"<<endl;
 				initi = *iiter; initj = *jiter;
 				break;
 			}
 		}
-		if(initi == r && initj == c)
+		if(initi == r && initj == c) //When the current pixel is same as the initial ones one iteration is done.
 		{
 			done--;
 		}
 		idiff = *iiter - *(iiter-1);
 		jdiff = *jiter - *(jiter-1);
+		/*Find the direction in which we are parsing currently to determine the direction in which we have to parse for neighbourhood*/
 		finddirection(idiff,jdiff,dir);
 	}
 	cout<<"Contour size: "<<contouri.size()<<endl;
 
 	/*------------------------------ Making the .poly file ---------------------------------*/
+	/*This holds the countour of the image to parse it for triangulation*/
 
 	vector <int> :: iterator ciiter,cjiter;
 	ofstream outdata;
@@ -103,6 +109,8 @@ int main()
 		cout<<"Error opening file"<<endl;return 0;
 	}
 
+	/*Traingulation needs a polygon with an edge big enough for triangulation. So, we can't use all the pixels on contour.
+	We have taken pixels at a regular interval of 5(to keep a dense mesh). Can be changed as required.*/
 	int csize = contouri.size();
 	if(csize % 5 == 0 || (csize -1)%5 == 0)
 		csize = (csize/5) + 1;
@@ -130,25 +138,12 @@ int main()
 	outdata<<0<<endl;
 	outdata.close();
 
-	//Silhouette image
-
-	// CImg<unsigned char> silho(width,height,1,1,0);
-	// const unsigned char black[1] = {0},white[3]={255,255,255};
-	// silho.draw_fill(0,0,white);
-	// for(ciiter = contouri.begin(),cjiter=contourj.begin();(ciiter+1)!=contouri.end();ciiter++,cjiter++)
-	// {
-	// 	cout<<*cjiter<<","<<*ciiter<<","<<*(cjiter+1)<<","<<*(ciiter+1)<<endl;
-	// 	silho.draw_line(*cjiter,*ciiter,*(cjiter+1),*(ciiter+1),black);
-	// }
-	//
-	// silho.draw_fill(c+1,r+1,black);
-	// silho.save("silho.png");
-
 	return 0;
 }
 
 
 void fillneighbor(int dir,int &initi, int &initj, vector<int> &ni, vector<int> &nj)
+/*Find all the neighbourhood pixels of the current pixel*/
 {
 	int xd=0,yd=0;
 	switch(dir)
@@ -191,6 +186,7 @@ void fillneighbor(int dir,int &initi, int &initj, vector<int> &ni, vector<int> &
 }
 
 void turn(int &dir, int &x, int &y, char turnto)
+/*Change the direction to go around in clockwise direction*/
 {
 	dir = (dir+1+4)%4;
 	switch(dir)
@@ -203,6 +199,9 @@ void turn(int &dir, int &x, int &y, char turnto)
 }
 
 bool entryexists(int curri,int currj,vector <int> contouri,vector <int> contourj)
+/*Check if the current valid pixel is already added to contour*/
+/*To be done: Change the implementation to save ordered pairs instead of two different vectors
+So, this could be avoided*/
 {
 	vector <int> :: iterator i;
 	for(i=contouri.begin();i != contouri.end(); i++)
@@ -215,6 +214,13 @@ bool entryexists(int curri,int currj,vector <int> contouri,vector <int> contourj
 }
 
 void finddirection(int idiff,int jdiff,int &dir)
+/*To determine the initial direction of parsing based on
+difference in x,y of current and previous contour pixel.
+0 - right
+1 - down
+2 - left
+3 - up
+*/
 {
 	if(idiff == 0 && jdiff == 1)
 		dir = 3;

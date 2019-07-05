@@ -118,19 +118,13 @@ for name in rf:
             neighborhood[jointsindexfirst].append(jointsindexsecond)
             neighborhood[jointsindexsecond].append(jointsindexfirst)
             evenflag = True
-        # print("flag: ",evenflag,"  first point: ",firstpoint," secondpoint: ",secondpoint)
 
     # dfsqueue = []
     donequeue = []
     pointlabel = [""] * 15
-    # dfsqueue.append(sortlist[0][2])
-    # while len(dfsqueue) > 0:
-    #     nodeindex = dfsqueue[0]
-    #     neighs = []
-    #     for neighbors in neighborhood[nodeindex]:
-    #         if (len(donequeue)>0) and !(joints[neighbors] in donequeue):
-    #             neighs.append(joints[neighbors])
-    #     neighs.sort()
+
+    # To parse the skeleton and generate obtain the joints in an order to label them 
+    # as in 'labels' list below
     def dfs(nodeindex):
         donequeue.append(nodeindex)
         neighs = []

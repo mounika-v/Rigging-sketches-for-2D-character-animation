@@ -1,3 +1,6 @@
+# Script to resize all the images to be of dimension 512,512 like we did in getContour.cpp file.
+# Could be avoided if we saved the resized image in getContour.cpp.
+
 import os
 mycmd = 'ls sketch*.png > imlist.txt'
 os.system(mycmd)

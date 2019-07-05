@@ -1,3 +1,6 @@
+# Created to get the bounding box data and segmentation data of each sketch to Created
+# data for training
+
 import os
 mycmd = 'ls sketch*.png > imlist.txt'
 os.system(mycmd)
