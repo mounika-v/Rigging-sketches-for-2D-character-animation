@@ -13,6 +13,7 @@ from PIL import Image,ImageTk
 class MainWindow():
 
     def __init__(self, main):
+        # Opening UI
         self.frame = Frame(main)
         self.frame.grid(row=0, column=0)
         self.frame2 = Frame(main)
@@ -26,13 +27,16 @@ class MainWindow():
         self.scroll_y = Scrollbar(self.frame, orient="vertical", command=self.canvas.yview)
         self.scroll_y.grid(row=0, column=1, sticky="ns")
         self.canvas.configure(yscrollcommand=self.scroll_y.set, xscrollcommand=self.scroll_x.set,scrollregion=self.canvas.bbox("all"))
-        # button to change image
+        # button to Load image
         self.openbutton = Button(self.frame2, text="New Image", command=self.openImage)
         self.openbutton.grid(row=0,column=0)
+        # button to load a saved project
         self.loadbutton = Button(self.frame2, text="Load project",command=self.openSaved)
         self.loadbutton.grid(row=0,column=1)
+        # button to enable editing the skeleton
         self.editbutton = Button(self.frame2, text="Edit skeleton", command=self.onEdit)
         self.editbutton.grid(row=0,column=2)
+        # button to save the current skeleton
         self.savebutton = Button(self.frame2, text="Save skeleton", command=self.onSave)
         self.savebutton.grid(row=0,column=3)
         # self.textspace = Text(self.frame)
@@ -50,6 +54,7 @@ class MainWindow():
         self.image_on_canvas = self.canvas.create_image(0, 0, anchor = NW, image = ImageTk.PhotoImage(file="hi.png"))
 
     def tkinter_display(self,the_message):
+        # To show a status message at the bottom of the GUI as textual help
         try:
             self.textspace.grid_remove()
         except(NameError, AttributeError):
@@ -58,6 +63,7 @@ class MainWindow():
         self.textspace.grid(row=0)
 
     def loadSkeleton(self):
+        # Get the image and impose the skeleton from variables onto this image and display
         filename = self.source
         ipimg = cv2.imread(filename)
         self.srcheight,self.srcwidth,_ = ipimg.shape
@@ -74,6 +80,8 @@ class MainWindow():
         self.tkinter_display('Displaying skeleton. Click on edit to make changes to skeleton')
 
     def onSave(self):
+        # Save the contents of all the variables to an skl file
+        # that can be loaded to the tool later and worked on
         writefile = open(self.outputfile,"w")
         writefile.write(self.inputfile+"\n")
         for kpt in self.keypoints:
@@ -92,6 +100,7 @@ class MainWindow():
         self.tkinter_display('File saved as '+self.outputfile)
 
     def loadSaved(self):
+        # Load the contents of the file into variables for display and editing
         filename = self.outputfile
         opfile = open(filename)
         hierflag=False
@@ -109,7 +118,7 @@ class MainWindow():
             elif(len(args)>3 and hierflag ==False):
                 for iter in args:
                     self.donelist.append(int(iter))
-                hierflag = True
+                hierflag = True #All the skeleton data is read. Below data is going to be hieararchy data.
             elif hierflag:
                 child = []
                 if len(args) > 0:
@@ -124,6 +133,7 @@ class MainWindow():
         self.loadSkeleton()
 
     def openSaved(self):
+        # Open the input file and reset all the variables for the new file
         filename = askopenfilename(title="Select an skl file")
         if filename != "" and filename.split('.')[-1] == "skl":
             self.tkinter_display("Openinng file "+filename)
@@ -162,6 +172,7 @@ class MainWindow():
         self.resetflags()
 
     def bfs(self):
+        # To determine the hierarchy
         target = self.pstack.pop(0)
         child = []
         for edge in self.edges:
@@ -279,6 +290,7 @@ class MainWindow():
                     self.tkinter_display("Hierarchy generated")
 
     def onEdit(self):
+        # Display all the edit options
         self.addbutton = Button(self.frame2, text="Add point", command=self.addmode)
         self.addbutton.grid(row=1,column=1)
         self.movebutton = Button(self.frame2, text="Move point", command=self.movemode)
@@ -287,11 +299,14 @@ class MainWindow():
         self.deletebutton.grid(row=1,column=3)
         self.resetbutton = Button(self.frame2, text="Reset prediction",command=self.onPredict)
         self.resetbutton.grid(row=1,column=4)
+        # Button that calculates the hierarchy of the skeleton on selecting a root node. This can be used for determining
+        # hierarchy for animation.
         self.hierarchy = Button(self.frame2, text="Hierarchy",command=self.onHierarchy)
         self.hierarchy.grid(row=1,column=5)
         self.canvas.bind("<Button 1>",self.printcoords)
 
     def openImage(self):
+        # Open the image and display it
         try:
             self.addbutton.grid_remove()
             self.movebutton.grid_remove()
@@ -313,6 +328,7 @@ class MainWindow():
 
     def onPredict(self):
         # Predict skeleton
+        # Run the rundemo script with current input image as an argument
         self.tkinter_display('Predicting image')
         filename = self.inputfile
         self.inputfile = filename.split('\n')[0]

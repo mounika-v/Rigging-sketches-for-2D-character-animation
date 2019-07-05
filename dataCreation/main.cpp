@@ -28,14 +28,6 @@ namespace mesh
 
 		static int debugflag = 1;
 
-		cout<<"in double area function"<<endl;
-
-		// Compute edge lengths
-		//Eigen::Matrix<typename DerivedV::Scalar, Eigen::Dynamic, 3> l;
-		//igl::edge_lengths(V,F,l);
-
-		//igl::doublearea(l,0.0,dblA);
-
 		// Projected area helper
 		const auto & proj_doublearea =
 		[&V,&F](const int x, const int y, const int f)
@@ -46,7 +38,7 @@ namespace mesh
 					V(F(f,0),y) != V(F(f,0),y) || V(F(f,2),y)!=V(F(f,2),y) ||
 					V(F(f,1),y) != V(F(f,1),y) || V(F(f,2),y) != V(F(f,2),y))
 			{
-					// cout<<"there is a non number returning zero"<<endl;
+					// cout<<"there is a non-number returning zero"<<endl;
 					return 0.0;
 			}
 			auto rx = V(F(f,0),x)-V(F(f,2),x);
@@ -94,6 +86,7 @@ int main(int argc, char * argv[])
 
    igl::opengl::glfw::Viewer viewer;
 
+	 /*Some variable names are directly taken from the reference paper. Please refer to the paper*/
    MatrixXd V,U,tempU;
    MatrixXi F,tempF;
    SparseMatrix<double> L;
@@ -126,32 +119,6 @@ int main(int argc, char * argv[])
      num_collapsed = 0;
      vcount = V.rows();
      U=V;
-
-
-//For test to be deleted:
-//
-// igl::edge_flaps(F,E,EMAP,EF,EI); //Creating an edge Matrix
-// E2 = E;
-// for(int iter=0;iter<V.rows();iter++)
-// {
-// 	 vector<int> temp;
-// 	 // temp.push_back(0);
-// 	 vertextoedgemap.push_back(temp);
-// }
-// //For each vertex we are saving all the edges that are sharing the vertex.
-// for(int iter=0; iter<E2.rows(); iter++)
-// {
-// 		 vertextoedgemap.at(E2(iter,0)).push_back(iter);
-// 		 vertextoedgemap.at(E2(iter,1)).push_back(iter);
-// }
-//
-// for(int iter=0; iter<V.rows();iter++)
-// {
-// 	 for(int jiter=0; jiter < vertextoedgemap.at(iter).size(); jiter++)
-// 	 			cout<<vertextoedgemap.at(iter).at(jiter)<<"  ";
-// 		cout<<endl;
-// }
-
 
 		 cout<<"Vertices: "<<V.rows()<<endl;
 		 cout<<"Faces: "<<F.rows()<<endl;
@@ -263,13 +230,6 @@ int main(int argc, char * argv[])
 					fa(i,1) = pt.transpose() * qmatrix.at(E(i,1)) * pt;
 				}
 
-
-				// cout<<"Creating FA for vertices"<<endl;
-
-				// bool zeroflag = true;
-				// while(zeroflag)
-				// {
-
 				//Creating fb. We are taking two cols of fb because the direction of collapse matters for fb.
 				//calculating norms of all the edges.
 				VectorXd normvec = VectorXd::Zero(E.rows());
@@ -308,8 +268,8 @@ int main(int argc, char * argv[])
 	 };
 
 	 const auto &removeDupFaces = [&]()
+	 //Removing duplicating faces
 	 {
-		 	// cout<<"Removing duplicating faces ^^^^^^^^^^"<<endl;
 		 	vector<vector<int>> faceslist;
 		 	for(int i=0; i<F.rows(); i++)
 			{
@@ -349,8 +309,8 @@ int main(int argc, char * argv[])
 	 };
 
 	 const auto &removeDupEdges = [&]()
+	 /*Removing duplicate edges*/
 	 {
-		 	// cout<<"Removing duplicating edges ^^^^^^^^^^"<<endl;
 		 	vector<vector<int>> edgeslist;
 		 	for(int i=0; i<E.rows(); i++)
 			{
@@ -1127,7 +1087,7 @@ int main(int argc, char * argv[])
 						// 		}
 						// }
 
-						
+
 						ofstream op;
 						op.open("../1d/skeleton.raw");
 						for(int i=0;i<E.rows();i++)

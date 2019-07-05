@@ -215,6 +215,7 @@ void loadSkeleton(void)
     {
         // v_positions[i] = glm::vec4(x/10,y/10,z/10,1.0f);
         v_positions[i]=glm::vec4(x/scaleby - 1.0, -y/scaleby + 1.0,z/scaleby,1.0f);
+        //Scaleby because the window size could be smaller than the sketch skeleton size
         // v_positions[i]=glm::vec4(6*x/100, 6*y/100, 6*z/100, 1.0f);
         v_colors[i] = avail_colors[i%4];//glm::vec4(1.0f,1.0f,0.0f,1.0f);
         i++;
@@ -1040,7 +1041,7 @@ int main(int argc, char** argv)
   //Initialize GL state
   csX75::initGL();
   initBuffersGL();
-  cout<<"Current mode is idle. Press E to start editing"<<endl;
+  cout<<"Current mode is idle. Press any option to start editing"<<endl;
 
   // Loop until the user closes the window
   while (glfwWindowShouldClose(window) == 0)

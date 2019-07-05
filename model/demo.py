@@ -85,8 +85,8 @@ def run_demo(net, image_provider, height_size, cpu):
 
     stride = 8
     upsample_ratio = 4
-    color = [255, 0, 0]
-    colorcircle = [0, 0, 255]
+    color = [255, 0, 0] #To show the bones
+    colorcircle = [0, 0, 255] #To show the joints
     for img in image_provider:
         orig_img = img.copy()
         heatmaps, pafs, scale, pad = infer_fast(net, img, height_size, stride, upsample_ratio, cpu)
@@ -116,7 +116,7 @@ def run_demo(net, image_provider, height_size, cpu):
         for n in range(len(pose_entries)):
             if len(pose_entries[n]) == 0:
                 continue
-            ######### calculate root point
+            ######### calculate root point (since the prediction will give a set of joints that doesn't have root node)
             bneck = 0.406394346548266
             bleft = 0.295839233078765
             bright = 0.297766420372969
